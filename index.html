@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>ArenaBook - Booking Lapangan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div id="login-section" class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white text-center fw-bold">
+                        Login ArenaBook
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" id="email" class="form-control" placeholder="Masukkan email">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" id="password" class="form-control" placeholder="Masukkan password (bebas)">
+                        </div>
+                        <button id="btn-login" class="btn btn-primary w-100 fw-bold" onclick="prosesLogin()">Masuk</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-section" style="display: none;">
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container">
+                <span class="navbar-brand mb-0 h1">ArenaBook</span>
+                <span class="navbar-text text-white">Login sebagai: <b id="user-display"></b></span>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-primary text-white fw-bold">Form Sewa Lapangan</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Durasi Sewa (Jam):</label>
+                                <input type="number" id="durasi" class="form-control" value="1" min="1" max="12">
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="isMember">
+                                <label class="form-check-label" for="isMember">Saya adalah Member (Diskon 10%)</label>
+                            </div>
+                            <button id="btn-kalkulasi" class="btn btn-secondary w-100 mb-3" onclick="hitungBiaya()">Kalkulasi Biaya</button>
+                            <div class="alert alert-info mb-0 text-center">
+                                Total Tagihan: <strong id="total-tagihan" class="fs-5">Rp 0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-success text-white fw-bold">Pembayaran & Status</div>
+                        <div class="card-body">
+                            <div class="alert alert-warning text-center" id="status-box">
+                                Status: <strong id="status" class="fs-5">Menunggu Pembayaran</strong>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nominal Bayar (Rp):</label>
+                                <input type="number" id="nominal" class="form-control" placeholder="Masukkan nominal">
+                            </div>
+                            <button id="btn-bayar" class="btn btn-success w-100 fw-bold" onclick="prosesBayar()">Bayar Sekarang</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-5">
+                <div class="card-header bg-dark text-white fw-bold">Dashboard Jadwal Lapangan</div>
+                <div class="card-body">
+                    <table class="table table-bordered text-center align-middle">
+                        <thead class="table-light">
+                            <tr><th>Jam</th><th>Penyewa</th><th>Status Lapangan</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>19:00 - 20:00</td>
+                                <td>Budi (Member)</td>
+                                <td><span class="badge bg-danger">Terpakai</span></td>
+                            </tr>
+                            <tr>
+                                <td>20:00 - Selesai</td>
+                                <td><span id="jadwal-baru">-</span></td>
+                                <td><span id="status-jadwal" class="badge bg-success">Tersedia</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tagihanSaatIni = 0;
+        let emailPengguna = "";
+
+        // Logika Fitur 1 (Login)
+        function prosesLogin() {
+            emailPengguna = document.getElementById('email').value;
+            if (emailPengguna.includes('@')) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('user-display').innerText = emailPengguna;
+            } else {
+                alert("Format email salah! Harus mengandung '@'");
+            }
+        }
+
+        function hitungBiaya() {
+            let jam = parseInt(document.getElementById('durasi').value);
+            let isMember = document.getElementById('isMember').checked;
+            
+            if (jam < 1 || jam > 12) { alert("Durasi harus 1-12 jam!"); return; }
+
+            let total = jam * 100000;
+            if (jam >= 3) { total -= 50000; }
+            if (isMember) { total = total * 0.9; }
+            
+            tagihanSaatIni = total;
+            document.getElementById('total-tagihan').innerText = "Rp " + total.toLocaleString('id-ID');
+        }
+
+        function prosesBayar() {
+            let nominal = document.getElementById('nominal').value;
+            if (tagihanSaatIni === 0) { alert("Kalkulasi biaya dulu!"); return; }
+            
+            if (nominal >= tagihanSaatIni) {
+                document.getElementById('status').innerText = 'Lunas';
+                document.getElementById('status-box').className = 'alert alert-success text-center';
+                
+                document.getElementById('jadwal-baru').innerText = emailPengguna; // Nama di jadwal sesuai email
+                document.getElementById('status-jadwal').className = 'badge bg-danger';
+                document.getElementById('status-jadwal').innerText = 'Terpakai';
+            } else {
+                alert("Nominal pembayaran kurang!");
+            }
+        }
+    </script>
+</body>
+</html>
