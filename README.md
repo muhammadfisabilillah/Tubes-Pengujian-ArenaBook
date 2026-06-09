@@ -20,6 +20,46 @@ Sebelum menjalankan testing, pastikan komputermu sudah terinstall:
 * Python 3.x & pip (Untuk Selenium)
 * Google Chrome (Untuk UI Testing)
 
+
+
+💻 Cara Menjalankan Pengujian
+1. Backend Testing (PEST Framework - PHP)
+Pastikan kamu sudah menginstall vendor dependency terlebih dahulu menggunakan terminal:
+
+Bash
+composer install
+Menjalankan Unit Test (3 Test Cases - Basis Path):
+
+Bash
+./vendor/bin/pest tests/Unit/ArenaBookTest.php
+Menjalankan Feature Test (6 Test Cases - Equivalence Partitioning):
+
+Bash
+./vendor/bin/pest tests/Feature/ArenaBookFeatureTest.php
+2. UI Automation Testing (Selenium - Python)
+Install library Selenium terlebih dahulu melalui terminal/command prompt:
+
+Bash
+pip install selenium
+Jalankan script Python untuk melihat simulasi robot melakukan login, kalkulasi, dan bayar secara otomatis pada browser:
+
+Bash
+python ui_test.py
+📊 Alur State Transition (UI Testing)
+Script Selenium pada project ini berjalan berdasarkan skenario State Transition Diagram berikut:
+Initial State ➔ Form Login ➔ Dashboard (Form Sewa) ➔ Menunggu Pembayaran ➔ Final State (Lunas & Terpakai).
+
+
+---
+
+### Langkah Akhir: Upload ke GitHub
+Setelah file `README.md` disimpan, kamu tinggal meng- *upload* perubahan terbaru ini ke repository GitHub yang sudah kita sambungkan tadi dengan mengetikkan perintah ini di terminal VS Code:
+
+```bash
+git add README.md
+git commit -m "Docs: Menambahkan README untuk panduan project"
+git push origin main
+
 ### Struktur Project
 ```text
 TUBES IMPLENTASI/
@@ -32,3 +72,5 @@ TUBES IMPLENTASI/
 ├── index.html                         # Mockup UI Dashboard terintegrasi (Bab 5)
 ├── ui_test.py                         # Script otomatisasi Selenium (Python)
 └── vendor/                            # Folder dependency Composer
+
+
