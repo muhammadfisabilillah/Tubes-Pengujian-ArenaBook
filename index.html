@@ -39,6 +39,8 @@
         </nav>
 
         <div class="container mt-4">
+            <div id="notifikasi-error" class="alert alert-danger text-center" style="display: none;">Jadwal tidak tersedia, sudah di-booking!</div>
+
             <div class="row">
                 <div class="col-md-6 mb-4">
                     <div class="card shadow-sm h-100">
@@ -50,7 +52,7 @@
                             </div>
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="isMember">
-                                <label class="form-check-label" for="isMember">Saya adalah Member (Diskon 10%)</label>
+                                <label class="form-check-label" for="isMember">Saya adalah Member (Diskon 10% blocks)</label>
                             </div>
                             <button id="btn-kalkulasi" class="btn btn-secondary w-100 mb-3" onclick="hitungBiaya()">Kalkulasi Biaya</button>
                             <div class="alert alert-info mb-0 text-center">
@@ -106,19 +108,47 @@
         let tagihanSaatIni = 0;
         let emailPengguna = "";
 
-        // Logika Fitur 1 (Login)
+        // Fungsi sinkronisasi status jadwal global via localStorage
+        function sinkronisasiJadwalLayar() {
+            let statusJadwalGlobal = localStorage.getItem('arena_status_jadwal');
+            let penyewaGlobal = localStorage.getItem('arena_penyewa');
+
+            if (statusJadwalGlobal === 'Terpakai') {
+                document.getElementById('jadwal-baru').innerText = penyewaGlobal;
+                document.getElementById('status-jadwal').className = 'badge bg-danger';
+                document.getElementById('status-jadwal').innerText = 'Terpakai';
+            } else {
+                document.getElementById('jadwal-baru').innerText = '-';
+                document.getElementById('status-jadwal').className = 'badge bg-success';
+                document.getElementById('status-jadwal').innerText = 'Tersedia';
+            }
+        }
+
+        sinkronisasiJadwalLayar();
+        setInterval(sinkronisasiJadwalLayar, 500);
+
         function prosesLogin() {
             emailPengguna = document.getElementById('email').value;
             if (emailPengguna.includes('@')) {
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('user-display').innerText = emailPengguna;
+                sinkronisasiJadwalLayar();
             } else {
                 alert("Format email salah! Harus mengandung '@'");
             }
         }
 
         function hitungBiaya() {
+            // Sembunyikan alert error setiap kali kalkulasi dipicu kembali
+            document.getElementById('notifikasi-error').style.display = 'none';
+
+            // TRIGGER ANTI DOUBLE-BOOKING
+            if (localStorage.getItem('arena_status_jadwal') === 'Terpakai') {
+                document.getElementById('notifikasi-error').style.display = 'block';
+                return;
+            }
+
             let jam = parseInt(document.getElementById('durasi').value);
             let isMember = document.getElementById('isMember').checked;
             
@@ -136,13 +166,19 @@
             let nominal = document.getElementById('nominal').value;
             if (tagihanSaatIni === 0) { alert("Kalkulasi biaya dulu!"); return; }
             
+            if (localStorage.getItem('arena_status_jadwal') === 'Terpakai') {
+                document.getElementById('notifikasi-error').style.display = 'block';
+                return;
+            }
+
             if (nominal >= tagihanSaatIni) {
                 document.getElementById('status').innerText = 'Lunas';
                 document.getElementById('status-box').className = 'alert alert-success text-center';
                 
-                document.getElementById('jadwal-baru').innerText = emailPengguna; // Nama di jadwal sesuai email
-                document.getElementById('status-jadwal').className = 'badge bg-danger';
-                document.getElementById('status-jadwal').innerText = 'Terpakai';
+                localStorage.setItem('arena_status_jadwal', 'Terpakai');
+                localStorage.setItem('arena_penyewa', emailPengguna);
+                
+                sinkronisasiJadwalLayar();
             } else {
                 alert("Nominal pembayaran kurang!");
             }
